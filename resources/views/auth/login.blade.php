@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout title="Accedi per viaggiare in Automarket! Ti aspettiamo!">
 
     <div class="w-full max-w-md bg-gray-800 p-10 rounded-xl shadow-xl">
 

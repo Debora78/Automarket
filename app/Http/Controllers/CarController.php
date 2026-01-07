@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Car;
 use Illuminate\Http\Request;
 
+use function PHPSTORM_META\type;
+
 class CarController extends Controller
 {
     /**
@@ -13,7 +15,7 @@ class CarController extends Controller
     public function index()
     {
         $cars = Car::with('images', 'category', 'user')
-            ->where('is_approved', true)
+            ->approved() // usa lo scope
             ->latest()
             ->paginate(12);
 
@@ -34,12 +36,15 @@ class CarController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string|max:2000',
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id',
             'type' => 'required|in:sale_new,sale_used,rental',
             'year' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'km' => 'nullable|integer|min:0',
             'color' => 'nullable|string|max:50',
             'accessories' => 'nullable|array',
             'images.*' => 'nullable|image|max:2048',
@@ -48,19 +53,22 @@ class CarController extends Controller
         $car = Car::create([
             'title' => $validated['title'],
             'description' => $validated['description'],
+            'brand' => $validated['brand'],
+            'model' => $validated['model'],
             'price' => $validated['price'],
             'category_id' => $validated['category_id'],
-            'brand' => $validated['brand'],
             'year' => $validated['year'],
             'km' => $validated['km'],
             'color' => $validated['color'],
-            'type' => $validated['listing_type'],
-            'user_id' => auth()->id(), // se vuoi collegarlo all’utente
+            'type' => $validated['type'], // CORRETTO
+            'status' => 'pending',
+            'user_id' => auth()->id(),
         ]);
-        // salva immagini e accessori se servono
 
         return redirect()->route('cars.index')->with('success', 'Annuncio inserito con successo!');
     }
+
+
 
     /**
      * Display the specified resource.

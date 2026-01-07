@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
+@props(['title' => ''])
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -20,10 +22,12 @@
 
     <!-- Contenuto della pagina (login/register) -->
     <div class="min-h-screen flex flex-col items-center  pt-28 ">
-        <x-typewriter-title text="Accedi per viaggiare in Automarket" />
+        <x-typewriter-title :text="$title" />
 
         {{ $slot }}
     </div>
+
+    <x-footer />
 
 </body>
 

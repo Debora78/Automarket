@@ -38,6 +38,15 @@
             € {{ number_format($car->price, 2, ',', '.') }}
         </p>
 
+
+        <form action="{{ route('cart.add', $car) }}" method="POST" class="mb-10">
+            @csrf
+            <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow text-lg">
+                Aggiungi al carrello
+            </button>
+        </form>
+
+
         {{-- CAROUSEL DI IMMAGINI --}}
         <div x-data="{
             touchStartX: 0,

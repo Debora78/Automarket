@@ -51,8 +51,24 @@ class User extends Authenticatable
         return $this->hasMany(Car::class);
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+
     public function isRevisor(): bool
     {
         return $this->is_revisor;
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    public function reviewerRequest()
+    {
+        return $this->hasOne(ReviewerRequest::class);
     }
 }

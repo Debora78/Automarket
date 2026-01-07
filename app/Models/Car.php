@@ -43,4 +43,14 @@ class Car extends Model
     {
         return $this->hasMany(Image::class);
     }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', 'approved');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
 }
