@@ -1,6 +1,22 @@
 <?php
 
+/**
+ * File di configurazione di Laravel Fortify.
+ *
+ * Qui vengono definiti:
+ * - il guard di autenticazione utilizzato da Fortify
+ * - il broker per il reset password
+ * - il campo usato come username
+ * - il percorso di redirect dopo login/reset
+ * - il middleware applicato alle rotte Fortify
+ * - i rate limiter per login e 2FA
+ * - le funzionalità Fortify abilitate (registrazione, reset password, 2FA, ecc.)
+ *
+ * Tutti i valori possono essere sovrascritti tramite variabili d’ambiente (.env).
+ */
+
 use Laravel\Fortify\Features;
+// Classe che permette di abilitare/disabilitare funzionalità Fortify.
 
 return [
 
@@ -9,12 +25,10 @@ return [
     | Fortify Guard
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which authentication guard Fortify will use while
-    | authenticating users. This value should correspond with one of your
-    | guards that is already present in your "auth" configuration file.
+    | Guard di autenticazione utilizzato da Fortify.
+    | Deve corrispondere a uno dei guard definiti in config/auth.php.
     |
     */
-
     'guard' => 'web',
 
     /*
@@ -22,12 +36,10 @@ return [
     | Fortify Password Broker
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which password broker Fortify can use when a user
-    | is resetting their password. This configured value should match one
-    | of your password brokers setup in your "auth" configuration file.
+    | Broker utilizzato per il reset password.
+    | Deve corrispondere a uno dei broker definiti in config/auth.php.
     |
     */
-
     'passwords' => 'users',
 
     /*
@@ -35,31 +47,27 @@ return [
     | Username / Email
     |--------------------------------------------------------------------------
     |
-    | This value defines which model attribute should be considered as your
-    | application's "username" field. Typically, this might be the email
-    | address of the users but you are free to change this value here.
+    | Campo utilizzato come "username" dell'applicazione.
+    | Di default è l'email, ma può essere cambiato (es. 'username').
     |
-    | Out of the box, Fortify expects forgot password and reset password
-    | requests to have a field named 'email'. If the application uses
-    | another name for the field you may define it below as needed.
+    | Fortify si aspetta che i form di reset/forgot password
+    | contengano un campo chiamato 'email', salvo modifica qui.
     |
     */
-
     'username' => 'email',
 
     'email' => 'email',
+    // Campo email utilizzato per reset password e autenticazione.
 
     /*
     |--------------------------------------------------------------------------
     | Lowercase Usernames
     |--------------------------------------------------------------------------
     |
-    | This value defines whether usernames should be lowercased before saving
-    | them in the database, as some database system string fields are case
-    | sensitive. You may disable this for your application if necessary.
+    | Se true, converte automaticamente gli username in minuscolo
+    | prima di salvarli nel database.
     |
     */
-
     'lowercase_usernames' => true,
 
     /*
@@ -67,12 +75,10 @@ return [
     | Home Path
     |--------------------------------------------------------------------------
     |
-    | Here you may configure the path where users will get redirected during
-    | authentication or password reset when the operations are successful
-    | and the user is authenticated. You are free to change this value.
+    | Percorso verso cui l’utente viene reindirizzato dopo login
+    | o reset password completato.
     |
     */
-
     'home' => '/cars/create',
 
     /*
@@ -80,12 +86,10 @@ return [
     | Fortify Routes Prefix / Subdomain
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which prefix Fortify will assign to all the routes
-    | that it registers with the application. If necessary, you may change
-    | subdomain under which all of the Fortify routes will be available.
+    | Prefisso e dominio per le rotte Fortify.
+    | Utile per organizzare le rotte sotto un namespace o subdominio.
     |
     */
-
     'prefix' => '',
 
     'domain' => null,
@@ -95,12 +99,10 @@ return [
     | Fortify Routes Middleware
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which middleware Fortify will assign to the routes
-    | that it registers with the application. If necessary, you may change
-    | these middleware but typically this provided default is preferred.
+    | Middleware applicati alle rotte Fortify.
+    | Di default viene usato il middleware 'web'.
     |
     */
-
     'middleware' => ['web'],
 
     /*
@@ -108,12 +110,10 @@ return [
     | Rate Limiting
     |--------------------------------------------------------------------------
     |
-    | By default, Fortify will throttle logins to five requests per minute for
-    | every email and IP address combination. However, if you would like to
-    | specify a custom rate limiter to call then you may specify it here.
+    | Rate limiter utilizzati da Fortify per login e 2FA.
+    | I limiter sono definiti nel FortifyServiceProvider.
     |
     */
-
     'limiters' => [
         'login' => 'login',
         'two-factor' => 'two-factor',
@@ -124,12 +124,10 @@ return [
     | Register View Routes
     |--------------------------------------------------------------------------
     |
-    | Here you may specify if the routes returning views should be disabled as
-    | you may not need them when building your own application. This may be
-    | especially true if you're writing a custom single-page application.
+    | Se impostato a false, Fortify non registrerà le rotte che restituiscono
+    | viste (login, register, ecc.). Utile per SPA o API-only.
     |
     */
-
     'views' => true,
 
     /*
@@ -137,22 +135,35 @@ return [
     | Features
     |--------------------------------------------------------------------------
     |
-    | Some of the Fortify features are optional. You may disable the features
-    | by removing them from this array. You're free to only remove some of
-    | these features or you can even remove all of these if you need to.
+    | Funzionalità Fortify abilitate.
+    | È possibile rimuovere o aggiungere feature a seconda delle necessità.
     |
     */
-
     'features' => [
         Features::registration(),
+        // Abilita la registrazione utenti.
+
         Features::resetPasswords(),
+        // Abilita il reset password.
+
         // Features::emailVerification(),
+        // Abilita la verifica email (disattivata).
+
         Features::updateProfileInformation(),
+        // Permette agli utenti di aggiornare i dati del profilo.
+
         Features::updatePasswords(),
+        // Permette agli utenti di aggiornare la password.
+
         Features::twoFactorAuthentication([
             'confirm' => true,
+            // Richiede conferma prima di abilitare la 2FA.
+
             'confirmPassword' => true,
+            // Richiede conferma password per operazioni sensibili.
+
             // 'window' => 0,
+            // Finestra temporale per codici TOTP (opzionale).
         ]),
     ],
 

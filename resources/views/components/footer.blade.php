@@ -1,7 +1,23 @@
+{{-- 
+FOOTER PRINCIPALE DEL SITO AUTOMARKET
+
+Struttura:
+- 4 colonne principali (Product, Company, Learn More, Connect With Us)
+- Sezione social con icone SVG personalizzate
+- Barra inferiore con copyright, link legali e selettore lingua
+
+Stile:
+- Tema dark con accenti verde neon (#22c55e)
+- Layout responsive (2 colonne su mobile, 4 su desktop)
+- Hover underline per i link
+--}}
+
 <footer class="bg-gray-900 text-green-400 text-sm border-t border-green-700 py-10 mt-12">
+
+    {{-- Contenitore principale del footer --}}
     <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-left">
 
-        <!-- PRODUCT -->
+        {{-- COLONNA: PRODUCT --}}
         <div>
             <h3 class="font-semibold mb-2 text-green-500">PRODUCT</h3>
             <ul class="space-y-1">
@@ -15,7 +31,7 @@
             </ul>
         </div>
 
-        <!-- COMPANY -->
+        {{-- COLONNA: COMPANY --}}
         <div>
             <h3 class="font-semibold mb-2 text-green-500">COMPANY</h3>
             <ul class="space-y-1">
@@ -28,7 +44,7 @@
             </ul>
         </div>
 
-        <!-- LEARN MORE -->
+        {{-- COLONNA: LEARN MORE --}}
         <div>
             <h3 class="font-semibold mb-2 text-green-500">LEARN MORE</h3>
             <ul class="space-y-1">
@@ -41,12 +57,13 @@
             </ul>
         </div>
 
-        <!-- CONNECT WITH US -->
+        {{-- COLONNA: CONNECT WITH US (icone social) --}}
         <div>
             <h3 class="font-semibold mb-2 text-green-500">CONNECT WITH US</h3>
+
             <ul class="space-y-3">
 
-                <!-- Facebook -->
+                {{-- Facebook --}}
                 <li class="flex items-center gap-2">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#1877F2"
@@ -55,7 +72,7 @@
                     <a href="#" class="hover:underline">Facebook</a>
                 </li>
 
-                <!-- Twitter -->
+                {{-- Twitter --}}
                 <li class="flex items-center gap-2">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#1DA1F2"
@@ -64,7 +81,7 @@
                     <a href="#" class="hover:underline">Twitter</a>
                 </li>
 
-                <!-- Instagram -->
+                {{-- Instagram --}}
                 <li class="flex items-center gap-2">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <defs>
@@ -81,7 +98,7 @@
                     <a href="#" class="hover:underline">Instagram</a>
                 </li>
 
-                <!-- LinkedIn -->
+                {{-- LinkedIn --}}
                 <li class="flex items-center gap-2">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#0A66C2"
@@ -92,7 +109,7 @@
                     <a href="#" class="hover:underline">LinkedIn</a>
                 </li>
 
-                <!-- YouTube -->
+                {{-- YouTube --}}
                 <li class="flex items-center gap-2">
                     <svg class="w-5 h-5" viewBox="0 0 24 24">
                         <path fill="#FF0000"
@@ -106,17 +123,22 @@
         </div>
     </div>
 
-    <!-- Bottom bar -->
+    {{-- BOTTOM BAR --}}
     <div
-        class="mt-10 border-t border-green-700 pt-6 px-4 text-center md:text-left flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
+        class="mt-10 border-t border-green-700 pt-6 px-4 text-center md:text-left 
+           flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto">
+
+        {{-- Copyright --}}
         <p>&copy; {{ date('Y') }} AutoMarket. All Rights Reserved.</p>
 
+        {{-- Link legali --}}
         <div class="flex gap-4 mt-4 md:mt-0">
             <a href="#" class="hover:underline">Terms of Service</a>
             <a href="#" class="hover:underline">Privacy Policy</a>
             <a href="#" class="hover:underline">Site Map</a>
         </div>
 
+        {{-- Selettore lingua --}}
         <div class="mt-4 md:mt-0">
             <select class="bg-gray-800 text-green-400 border border-green-600 px-2 py-1 rounded">
                 <option>Italiano</option>
@@ -125,5 +147,6 @@
                 <option>Deutsch</option>
             </select>
         </div>
+
     </div>
 </footer>

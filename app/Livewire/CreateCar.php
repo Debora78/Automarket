@@ -1,22 +1,67 @@
 <?php
+// Apertura del file PHP.
+
+/**
+ * Questo componente Livewire gestisce la creazione di un nuovo annuncio auto.
+ *
+ * Si occupa di:
+ * - Validare i dati inseriti dall’utente
+ * - Salvare l’annuncio nel database
+ * - Gestire l’upload delle immagini tramite WithFileUploads
+ * - Processare le immagini con Intervention Image (resize, watermark, compressione)
+ * - Salvare sia l’immagine principale che la thumbnail
+ * - Collegare le immagini all’auto tramite il modello Image
+ * - Applicare il layout principale dell’app tramite l’attributo #[Layout]
+ *
+ * È uno dei componenti più avanzati del progetto, integrando Livewire,
+ * upload multipli, manipolazione immagini e salvataggio strutturato.
+ */
 
 namespace App\Livewire;
+// Namespace dedicato ai componenti Livewire.
 
 use App\Models\Car;
+// Modello Car, necessario per creare il nuovo annuncio.
+
 use App\Models\Image;
+// Modello Image, usato per salvare i percorsi delle immagini.
+
 use App\Models\Category;
+// Modello Category, usato per popolare il select delle categorie.
+
 use Livewire\Component;
+// Classe base per i componenti Livewire.
+
 use Livewire\WithFileUploads;
-use Intervention\Image\Facades\Image as ImageProcessor;
+// Trait che abilita l’upload dei file in Livewire.
+
+use Livewire\Attributes\Layout;
+// Attributo per definire il layout in Livewire 3.
+
+use Intervention\Image\ImageManager;
+// Classe principale per manipolare immagini.
+
+use Intervention\Image\Encoders\JpegEncoder;
+// Encoder per convertire e comprimere immagini in JPG.
+
 use Illuminate\Support\Facades\Storage;
+// Facade per salvare file nello storage Laravel.
+
 use Illuminate\Support\Facades\Auth;
+// Facade per recuperare l’utente autenticato.
+
+// Usa il layout principale dell'applicazione
+#[Layout('layouts.layout')]
 
 class CreateCar extends Component
-
+// Componente Livewire che gestisce la creazione di un nuovo annuncio auto.
 {
-
     use WithFileUploads;
+    // Abilita l’upload multiplo delle immagini.
+
     public $images = [];
+    // Array di immagini caricate dall’utente.
+
     public $title;
     public $description;
     public $price;
@@ -24,19 +69,35 @@ class CreateCar extends Component
     public $brand;
     public $year;
     public $km;
-    public $listing_type = 'sale_used'; // default auto usata
+
+    public $listing_type = 'sale_used';
+    // Tipo annuncio predefinito: auto usata.
 
     public $color;
-    public $selected_accessories = []; // array di accessori selezionati
+    public $selected_accessories = [];
+    // Accessori selezionati (array salvato come JSON).
+
+    public function mount()
+    // Metodo eseguito alla creazione del componente.
+    {
+        if (!auth()->check()) {
+            // Se l’utente non è autenticato, reindirizza al login.
+
+            return redirect()->route('login');
+        }
+    }
 
     public function render()
+    // Restituisce la vista del form di creazione.
     {
         return view('livewire.create-car', [
             'categories' => Category::all(),
+            // Passa tutte le categorie alla vista.
         ]);
     }
 
     public function store()
+    // Salva l’annuncio e processa le immagini.
     {
         // VALIDAZIONE DEI DATI INSERITI DALL'UTENTE
         $this->validate([
@@ -52,8 +113,6 @@ class CreateCar extends Component
             'color' => 'nullable|string|max:50',
             'selected_accessories' => 'nullable|array',
             'selected_accessories.*' => 'string|max:100',
-
-
         ]);
 
         // CREA L'AUTO E SALVA L'ID PER COLLEGARE LE IMMAGINI
@@ -68,69 +127,58 @@ class CreateCar extends Component
             'km' => $this->km,
             'listing_type' => $this->listing_type,
             'color' => $this->color,
-            'accessories' => $this->selected_accessories, // grazie al cast array->json in Car.php
+            'accessories' => $this->selected_accessories,
+            // Salvato come JSON grazie al cast nel modello Car.
         ]);
 
-        // CICLO SU OGNI IMMAGINE CARICATA
+        // Inizializza ImageManager usando GD (compatibile con PHP 8.3)
+        $manager = new ImageManager('gd');
+
         foreach ($this->images as $image) {
 
-            // CREA UN NOME FILE UNICO
+            // Nome file unico
             $filename = uniqid() . '.jpg';
 
             /*
-        |--------------------------------------------------------------------------
-        | 1. CREA L'IMMAGINE PRINCIPALE OTTIMIZZATA
-        |--------------------------------------------------------------------------
-        | - Ridimensiona max 1920px mantenendo proporzioni
-        | - Evita di ingrandire immagini piccole (upsize)
-        | - Converte in JPG qualità 80%
-        */
-            $original = ImageProcessor::make($image->getRealPath());
+            |--------------------------------------------------------------------------
+            | 1. IMMAGINE PRINCIPALE
+            |--------------------------------------------------------------------------
+            | - Ridimensiona mantenendo proporzioni
+            | - Evita distorsioni
+            | - Applica watermark
+            | - Converte in JPG qualità 80
+            */
 
-            // Resize
-            $original->resize(1920, null, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
+            $original = $manager->read($image->getRealPath())
+                ->scaleDown(1920) // riduce mantenendo proporzioni
+                ->place(public_path('img/watermark.png'), 'bottom-right', 20, 20)
+                ->encode(new JpegEncoder(quality: 80));
 
-            // Watermark (insert modifica l'immagine originale)
-            $original->insert(public_path('img/watermark.png'), 'bottom-right', 20, 20);
-
-            // Compressione JPG (encode coverte e comprime)
-            $original->encode('jpg', 80);
-
-
-
-
-
-            // SALVA L'IMMAGINE PRINCIPALE NELLO STORAGE
-            Storage::put('public/cars/' . $filename, $original->stream());
+            // Salva l'immagine principale
+            Storage::put('public/cars/' . $filename, $original->toString());
 
             /*
-        |--------------------------------------------------------------------------
-        | 2. CREA LA THUMBNAIL (VERSIONE LEGGERA)
-        |--------------------------------------------------------------------------
-        | - Ridimensiona max 400px
-        | - Mantiene proporzioni
-        | - Qualità 75%
-        */
-            $thumb = ImageProcessor::make($image->getRealPath())
-                ->resize(400, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                    $constraint->upsize();
-                })->encode('jpg', 75);
+            |--------------------------------------------------------------------------
+            | 2. THUMBNAIL
+            |--------------------------------------------------------------------------
+            | - Ridimensiona max 400px
+            | - Mantiene proporzioni
+            | - Qualità 75
+            */
 
-            // SALVA LA THUMBNAIL
-            Storage::put('public/cars/thumb_' . $filename, $thumb->stream());
+            $thumb = $manager->read($image->getRealPath())
+                ->scaleDown(400)
+                ->encode(new JpegEncoder(quality: 75));
+
+            // Salva la thumbnail
+            Storage::put('public/cars/thumb_' . $filename, $thumb->toString());
 
             /*
-        |--------------------------------------------------------------------------
-        | 3. SALVA I PERCORSI NEL DATABASE
-        |--------------------------------------------------------------------------
-        | - path = immagine principale
-        | - thumbnail = versione ridotta
-        | - car_id = collegamento all'annuncio
-        */
+            |--------------------------------------------------------------------------
+            | 3. SALVATAGGIO NEL DATABASE
+            |--------------------------------------------------------------------------
+            */
+
             Image::create([
                 'path' => 'cars/' . $filename,
                 'thumbnail' => 'cars/thumb_' . $filename,

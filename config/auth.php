@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * File di configurazione dell’autenticazione Laravel.
+ *
+ * Qui vengono definiti:
+ * - il guard predefinito (sessione web)
+ * - il provider degli utenti (Eloquent)
+ * - la configurazione del reset password
+ * - i timeout di conferma password
+ *
+ * Tutte le impostazioni possono essere sovrascritte tramite variabili d’ambiente.
+ */
+
 return [
 
     /*
@@ -7,15 +19,19 @@ return [
     | Authentication Defaults
     |--------------------------------------------------------------------------
     |
-    | This option defines the default authentication "guard" and password
-    | reset "broker" for your application. You may change these values
-    | as required, but they're a perfect start for most applications.
+    | Impostazioni predefinite per:
+    | - guard di autenticazione
+    | - broker per il reset della password
+    |
+    | Questi valori possono essere modificati nel file .env.
     |
     */
-
     'defaults' => [
         'guard' => env('AUTH_GUARD', 'web'),
+        // Guard predefinito: utilizza la sessione web.
+
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        // Broker predefinito per il reset password.
     ],
 
     /*
@@ -23,22 +39,21 @@ return [
     | Authentication Guards
     |--------------------------------------------------------------------------
     |
-    | Next, you may define every authentication guard for your application.
-    | Of course, a great default configuration has been defined for you
-    | which utilizes session storage plus the Eloquent user provider.
+    | I guard definiscono come gli utenti vengono autenticati.
+    | Il guard "web" utilizza:
+    | - driver "session"
+    | - provider "users"
     |
-    | All authentication guards have a user provider, which defines how the
-    | users are actually retrieved out of your database or other storage
-    | system used by the application. Typically, Eloquent is utilized.
-    |
-    | Supported: "session"
+    | È la configurazione standard per applicazioni web.
     |
     */
-
     'guards' => [
         'web' => [
             'driver' => 'session',
+            // Autenticazione basata su sessione.
+
             'provider' => 'users',
+            // Provider che recupera gli utenti dal database.
         ],
     ],
 
@@ -47,24 +62,24 @@ return [
     | User Providers
     |--------------------------------------------------------------------------
     |
-    | All authentication guards have a user provider, which defines how the
-    | users are actually retrieved out of your database or other storage
-    | system used by the application. Typically, Eloquent is utilized.
+    | I provider definiscono come gli utenti vengono recuperati dal database.
+    | Qui viene utilizzato Eloquent con il modello App\Models\User.
     |
-    | If you have multiple user tables or models you may configure multiple
-    | providers to represent the model / table. These providers may then
-    | be assigned to any extra authentication guards you have defined.
+    | È possibile definire provider multipli per gestire più tabelle utenti.
     |
-    | Supported: "database", "eloquent"
+    | Provider supportati: "eloquent", "database"
     |
     */
-
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
+            // Usa Eloquent per recuperare gli utenti.
+
             'model' => env('AUTH_MODEL', App\Models\User::class),
+            // Modello Eloquent utilizzato per l’autenticazione.
         ],
 
+        // Esempio alternativo con driver database:
         // 'users' => [
         //     'driver' => 'database',
         //     'table' => 'users',
@@ -76,26 +91,26 @@ return [
     | Resetting Passwords
     |--------------------------------------------------------------------------
     |
-    | These configuration options specify the behavior of Laravel's password
-    | reset functionality, including the table utilized for token storage
-    | and the user provider that is invoked to actually retrieve users.
-    |
-    | The expiry time is the number of minutes that each reset token will be
-    | considered valid. This security feature keeps tokens short-lived so
-    | they have less time to be guessed. You may change this as needed.
-    |
-    | The throttle setting is the number of seconds a user must wait before
-    | generating more password reset tokens. This prevents the user from
-    | quickly generating a very large amount of password reset tokens.
+    | Configurazione del sistema di reset password.
+    | - provider: quale provider utenti utilizzare
+    | - table: tabella che contiene i token di reset
+    | - expire: minuti di validità del token
+    | - throttle: tempo minimo tra richieste successive
     |
     */
-
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            // Provider associato al reset password.
+
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            // Tabella che contiene i token di reset.
+
             'expire' => 60,
+            // Token valido per 60 minuti.
+
             'throttle' => 60,
+            // L’utente può richiedere un nuovo token ogni 60 secondi.
         ],
     ],
 
@@ -104,12 +119,12 @@ return [
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
     |
-    | Here you may define the number of seconds before a password confirmation
-    | window expires and users are asked to re-enter their password via the
-    | confirmation screen. By default, the timeout lasts for three hours.
+    | Tempo (in secondi) prima che venga richiesta nuovamente
+    | la conferma della password per operazioni sensibili.
+    |
+    | Valore predefinito: 10800 secondi (3 ore).
     |
     */
-
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
 ];

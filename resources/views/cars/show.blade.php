@@ -1,13 +1,27 @@
+{{-- 
+Pagina di dettaglio auto.
+Mostra tutte le informazioni principali dell’annuncio:
+- titolo, categoria, tipo annuncio
+- colore, accessori, prezzo
+- pulsante per aggiungere al carrello
+- carousel immagini con swipe + fullscreen
+- descrizione e autore dell’annuncio
+--}}
+
 <x-layout>
 
     <div class="container mx-auto mt-10">
 
+        {{-- Titolo annuncio --}}
         <h1 class="text-3xl font-bold mb-4">{{ $car->title }}</h1>
 
+        {{-- Categoria --}}
         <p class="text-gray-600 mb-2">
-            Categoria: <span class="font-semibold">{{ $car->category->name }}</span>
+            Categoria:
+            <span class="font-semibold">{{ $car->category->name }}</span>
         </p>
 
+        {{-- Tipo annuncio --}}
         <p class="text-gray-600 mb-2">
             Tipo annuncio:
             <span class="font-semibold">
@@ -21,10 +35,13 @@
             </span>
         </p>
 
+        {{-- Colore --}}
         <p class="text-gray-600 mb-2">
-            Colore: <span class="font-semibold">{{ $car->color ?? 'N/D' }}</span>
+            Colore:
+            <span class="font-semibold">{{ $car->color ?? 'N/D' }}</span>
         </p>
 
+        {{-- Accessori --}}
         @if ($car->accessories)
             <p class="text-gray-600 mb-2">
                 Accessori:
@@ -34,11 +51,12 @@
             </p>
         @endif
 
+        {{-- Prezzo --}}
         <p class="text-blue text-2xl font-bold mb-6">
             € {{ number_format($car->price, 2, ',', '.') }}
         </p>
 
-
+        {{-- Pulsante aggiungi al carrello --}}
         <form action="{{ route('cart.add', $car) }}" method="POST" class="mb-10">
             @csrf
             <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow text-lg">
@@ -46,8 +64,9 @@
             </button>
         </form>
 
-
-        {{-- CAROUSEL DI IMMAGINI --}}
+        {{-- ---------------------------------------------------------------- --}}
+        {{-- CAROUSEL IMMAGINI (Alpine.js + swipe + fullscreen) --}}
+        {{-- ---------------------------------------------------------------- --}}
         <div x-data="{
             touchStartX: 0,
             touchEndX: 0,
@@ -66,7 +85,7 @@
             prev() { this.current = (this.current - 1 + this.total) % this.total }
         }" class="relative w-full max-w-5xl mx-auto mb-10 select-none">
 
-            <!-- IMMAGINE PRINCIPALE -->
+            {{-- Immagine principale --}}
             <div class="overflow-hidden rounded shadow">
                 @foreach ($car->images as $index => $image)
                     <img x-show="current === {{ $index }}" x-transition:enter="transition ease-out duration-300"
@@ -80,42 +99,47 @@
                 @endforeach
             </div>
 
-            <!-- FRECCIA SINISTRA -->
+            {{-- Freccia sinistra --}}
             <button @click="prev()"
                 class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 px-3 py-2 rounded-full shadow text-xl">
                 ‹
             </button>
 
-            <!-- FRECCIA DESTRA -->
+            {{-- Freccia destra --}}
             <button @click="next()"
                 class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 px-3 py-2 rounded-full shadow text-xl">
                 ›
             </button>
 
-            <!-- PALLINI -->
+            {{-- Indicatori (pallini) --}}
             <div class="flex justify-center gap-2 mt-4">
                 @foreach ($car->images as $index => $image)
                     <button @click="current = {{ $index }}" class="w-3 h-3 rounded-full transition"
-                        :class="current === {{ $index }} ? 'bg-blue' : 'bg-gray-400'"></button>
+                        :class="current === {{ $index }} ? 'bg-blue' : 'bg-gray-400'">
+                    </button>
                 @endforeach
             </div>
 
         </div>
+        {{-- ---------------------------------------------------------------- --}}
+        {{-- FINE CAROUSEL --}}
+        {{-- ---------------------------------------------------------------- --}}
 
-        {{-- FINE CAROUSEL DI IMMAGINI --}}
-
-        <!-- FULLSCREEN GALLERY -->
+        {{-- Fullscreen gallery --}}
         <div x-show="fullscreen" x-transition class="fixed inset-0 bg-black/90 flex items-center justify-center z-50"
             @click="fullscreen = false" x-cloak>
             <img :src="images[fullscreenIndex]" class="max-w-full max-h-full object-contain">
         </div>
 
+        {{-- Descrizione --}}
         <p class="text-lg leading-relaxed mb-10">
             {{ $car->description }}
         </p>
 
+        {{-- Autore annuncio --}}
         <p class="text-gray-700">
-            Pubblicato da: <strong>{{ $car->user->name }}</strong>
+            Pubblicato da:
+            <strong>{{ $car->user->name }}</strong>
         </p>
 
     </div>

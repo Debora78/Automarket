@@ -1,35 +1,56 @@
 <?php
 
+/**
+ * Migrazione che aggiunge tre nuovi campi alla tabella "cars":
+ *
+ * - brand: marca dell’auto (es. BMW, Audi, Fiat)
+ * - year: anno di immatricolazione
+ * - km: chilometraggio
+ *
+ * Tutti i campi sono nullable per permettere la creazione di annunci
+ * anche senza informazioni complete.
+ */
+
 use Illuminate\Database\Migrations\Migration;
+// Classe base per definire una migrazione.
+
 use Illuminate\Database\Schema\Blueprint;
+// Classe che rappresenta la struttura di una tabella.
+
 use Illuminate\Support\Facades\Schema;
+// Facade per eseguire operazioni sul database.
 
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Esegue la migrazione aggiungendo i nuovi campi alla tabella cars.
      */
     public function up(): void
     {
         Schema::table('cars', function (Blueprint $table) {
-            // tipo di annuncio: nuova, usata, noleggio
-            $table->enum('listing_type', ['sale_new', 'sale_used', 'rental'])->default('sale_used');
+            $table->string('brand')->nullable();
+            // Marca dell’auto.
 
-            // colore esterno dell'auto
-            $table->string('color')->nullable();
+            $table->integer('year')->nullable();
+            // Anno di immatricolazione.
 
-            // accessori come JSON (array)
-            $table->json('accessories')->nullable();
+            $table->integer('km')->nullable();
+            // Chilometraggio dell’auto.
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Annulla la migrazione.
+     *
+     * Nota: attualmente non rimuove le colonne.
+     * Se desideri una migrazione completamente reversibile,
+     * posso aggiungere il dropColumn.
      */
     public function down(): void
     {
         Schema::table('cars', function (Blueprint $table) {
-            $table->dropColumn(['listing_type', 'color', 'accessories']);
+            // $table->dropColumn(['brand', 'year', 'km']);
+            // Campi non rimossi per scelta.
         });
     }
 };

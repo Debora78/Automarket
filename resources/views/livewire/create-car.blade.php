@@ -1,16 +1,30 @@
+{{-- 
+Pagina: Inserimento nuovo annuncio (Automarket)
+
+Funzionalità:
+- Layout dark professionale con neon verde
+- Form strutturato in griglia responsive
+- Campi Livewire con anteprima immagini
+- Accessori selezionabili
+- Pulsante CTA coerente con il tema Automarket
+--}}
+
 <div class="bg-gray-900 text-white min-h-screen px-10 py-20 mt-20">
 
     <div class="max-w-7xl mx-auto bg-gray-800 p-16 rounded-2xl shadow-xl">
 
+        {{-- Titolo --}}
         <h1
-            class="text-3xl font-bold mb-12 text-transparent bg-clip-text bg-gradient-to-r 
-            from-green-400 via-green-500 to-green-600 drop-shadow-[0_0_20px_#22c55e] text-center">
+            class="text-3xl font-bold mb-12 text-transparent bg-clip-text bg-gradient-to-r
+               from-green-400 via-green-500 to-green-600
+               drop-shadow-[0_0_20px_#22c55e] text-center">
             Inserisci un nuovo annuncio
         </h1>
 
+        {{-- Form --}}
         <form wire:submit.prevent="store" class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-x-14 gap-y-12">
 
-            <!-- Tipo -->
+            {{-- Tipo --}}
             <div class="space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Tipo</label>
                 <select wire:model="listing_type" class="w-full rounded bg-gray-700 text-white border-gray-600 p-3">
@@ -20,7 +34,7 @@
                 </select>
             </div>
 
-            <!-- Colore -->
+            {{-- Colore --}}
             <div class="space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Colore</label>
                 <select wire:model="color" class="w-full rounded bg-gray-700 text-white border-gray-600 p-3">
@@ -34,58 +48,60 @@
                 </select>
             </div>
 
-            <!-- Categoria -->
+            {{-- Categoria --}}
             <div class="space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Categoria</label>
                 <select wire:model="category_id" class="w-full rounded bg-gray-700 text-white border-gray-600 p-3">
                     <option value="">Seleziona</option>
                     @foreach ($categories as $category)
-                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        <option value="{{ $category->id }}">
+                            {{ $category->name }}
+                        </option>
                     @endforeach
                 </select>
             </div>
 
-            <!-- Marca -->
+            {{-- Marca --}}
             <div class="space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Marca</label>
                 <input type="text" wire:model="brand"
                     class="w-full rounded bg-gray-700 text-white border-gray-600 p-3">
             </div>
 
-            <!-- Anno -->
+            {{-- Anno --}}
             <div class="space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Anno</label>
                 <input type="number" wire:model="year"
                     class="w-full rounded bg-gray-700 text-white border-gray-600 p-3">
             </div>
 
-            <!-- Prezzo -->
+            {{-- Prezzo --}}
             <div class="space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Prezzo (€)</label>
                 <input type="number" wire:model="price"
                     class="w-full rounded bg-gray-700 text-white border-gray-600 p-3">
             </div>
 
-            <!-- Km -->
+            {{-- Km --}}
             <div class="space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Km</label>
                 <input type="number" wire:model="km" class="w-full rounded bg-gray-700 text-white border-gray-600 p-3">
             </div>
 
-            <!-- Titolo -->
+            {{-- Titolo --}}
             <div class="col-span-1 md:col-span-2 xl:col-span-4 space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Titolo</label>
                 <input type="text" wire:model="title"
                     class="w-full rounded bg-gray-700 text-white border-gray-600 p-3">
             </div>
 
-            <!-- Descrizione -->
+            {{-- Descrizione --}}
             <div class="col-span-1 md:col-span-2 xl:col-span-4 space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Descrizione</label>
                 <textarea wire:model="description" class="w-full rounded bg-gray-700 text-white border-gray-600 p-3 h-32"></textarea>
             </div>
 
-            <!-- Immagini -->
+            {{-- Immagini --}}
             <div class="col-span-1 md:col-span-2 xl:col-span-4 space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Immagini</label>
                 <input type="file" wire:model="images" multiple
@@ -94,30 +110,32 @@
                 @if ($images)
                     <div class="grid grid-cols-3 gap-4 mt-4">
                         @foreach ($images as $image)
-                            <img src="{{ $image->temporaryUrl() }}" class="rounded shadow">
+                            <img src="{{ $image->temporaryUrl() }}" class="rounded shadow-lg object-cover">
                         @endforeach
                     </div>
                 @endif
             </div>
 
-            <!-- Accessori -->
+            {{-- Accessori --}}
             <div class="col-span-1 md:col-span-2 xl:col-span-4 space-y-3">
                 <label class="text-sm font-semibold text-gray-300">Accessori</label>
+
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     @foreach (['Climatizzatore', 'Navigatore', 'Bluetooth', 'Sensori parcheggio', 'Cruise control', 'Cerchi in lega', 'Sedili riscaldati', 'Telecamera posteriore'] as $acc)
                         <label class="flex items-center space-x-2 text-gray-300">
                             <input type="checkbox" wire:model="selected_accessories" value="{{ $acc }}"
-                                class="bg-gray-700 border-gray-600 text-green-500">
+                                class="bg-gray-700 border-gray-600 text-green-500 rounded">
                             <span>{{ $acc }}</span>
                         </label>
                     @endforeach
                 </div>
             </div>
 
-            <!-- Bottone -->
+            {{-- Bottone --}}
             <div class="col-span-1 md:col-span-2 xl:col-span-4 text-center mt-12">
                 <button type="submit"
-                    class="bg-green-500 hover:bg-green-600 text-white font-semibold px-10 py-4 rounded-lg shadow-lg">
+                    class="bg-green-500 hover:bg-green-600 text-white font-semibold
+                           px-10 py-4 rounded-lg shadow-lg transition">
                     Salva annuncio
                 </button>
             </div>

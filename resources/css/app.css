@@ -1,3 +1,19 @@
+/* 
+ |--------------------------------------------------------------
+ | File principale Tailwind CSS
+ |--------------------------------------------------------------
+ |
+ | Questo file importa le tre direttive fondamentali di Tailwind:
+ | - base: stili di reset e normalizzazione
+ | - components: componenti predefiniti e personalizzabili
+ | - utilities: tutte le utility classes generate da Tailwind
+ |
+ | Il contenuto finale dipende dalla configurazione presente
+ | nel file tailwind.config.js.
+ */
+/* Importa gli stili base di Tailwind */
+/* Importa i componenti predefiniti */
+/* Importa tutte le utility classes */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
