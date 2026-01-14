@@ -35,6 +35,7 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileSecurityController;
 
 // Controller per revisori e amministratori
 use App\Http\Controllers\CheckoutController;
@@ -65,6 +66,12 @@ Route::get('/', function () {
 | Annunci (pubblici)
 |--------------------------------------------------------------------------
 */
+Route::middleware('auth')->group(function () {
+
+    // Pagina "I miei annunci"
+    Route::get('/my-cars', [CarController::class, 'myCars'])
+        ->name('user.cars');
+});
 
 // Lista auto
 Route::get('/cars', [CarController::class, 'index'])->name('cars.index');
@@ -80,6 +87,26 @@ Route::middleware(['auth'])->group(function () {
 
 // Dettaglio auto
 Route::get('/cars/{car}', [CarController::class, 'show'])->name('cars.show');
+/*
+|--------------------------------------------------------------------------
+| Modifica ed eliminazione annunci (solo autenticati)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+
+    // Modifica annuncio
+    Route::get('/cars/{car}/edit', [CarController::class, 'edit'])
+        ->name('cars.edit');
+
+    // Aggiornamento annuncio
+    Route::put('/cars/{car}', [CarController::class, 'update'])
+        ->name('cars.update');
+
+    // Eliminazione annuncio
+    Route::delete('/cars/{car}', [CarController::class, 'destroy'])
+        ->name('cars.destroy');
+});
+
 
 
 /*
@@ -99,8 +126,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 */
 Route::middleware('auth')->group(function () {
 
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
+    Route::get('/profile', [ProfileController::class, 'show'])
+        ->name('profile.show');
 
     Route::patch('/profile', [ProfileController::class, 'update'])
         ->name('profile.update');
@@ -109,7 +136,53 @@ Route::middleware('auth')->group(function () {
         ->name('profile.destroy');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Preferiti (solo utenti autenticati)
+|--------------------------------------------------------------------------
+| - L’utente può salvare auto nei preferiti
+| - Può visualizzare la lista completa
+| - Può aggiungere o rimuovere auto
+| - Tutto è legato all’utente tramite tabella pivot "favorites"
+*/
+Route::middleware('auth')->group(function () {
 
+    // Pagina preferiti
+    Route::get('/favorites', [CarController::class, 'favorites'])
+        ->name('favorites.index');
+
+    // Aggiungi ai preferiti
+    Route::post('/favorites/{car}', [CarController::class, 'addToFavorites'])
+        ->name('favorites.add');
+
+    // Rimuovi dai preferiti
+    Route::delete('/favorites/{car}', [CarController::class, 'removeFromFavorites'])
+        ->name('favorites.remove');
+});
+
+
+Route::middleware(['auth'])->group(function () {
+
+    // Pagina sicurezza e password
+    Route::get('/security', [ProfileSecurityController::class, 'index'])
+        ->name('password.change');
+
+    // Cambio password
+    Route::post('/security/password', [ProfileSecurityController::class, 'updatePassword'])
+        ->name('password.update');
+
+    // Attiva 2FA
+    Route::post('/security/2fa/enable', [ProfileSecurityController::class, 'enable2FA'])
+        ->name('2fa.enable');
+
+    // Disattiva 2FA
+    Route::post('/security/2fa/disable', [ProfileSecurityController::class, 'disable2FA'])
+        ->name('2fa.disable');
+
+    // Rigenera codici di recupero
+    Route::post('/security/2fa/recovery-codes', [ProfileSecurityController::class, 'regenerateRecoveryCodes'])
+        ->name('2fa.recovery');
+});
 /*
 |--------------------------------------------------------------------------
 | Area Admin (gestione richieste revisore)
@@ -153,26 +226,23 @@ Route::middleware(['auth', 'reviewer'])->group(function () {
 */
 Route::post('/request-reviewer', [ReviewerRequestController::class, 'store'])
     ->middleware(['auth'])
-    ->name('reviewer.request');
+    ->name('become.revisor');
 
 
 /*
 |--------------------------------------------------------------------------
-| Carrello (solo autenticati)
+| Carrello accessibile a tutti (guest + utenti)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
 
-    Route::get('/cart', [CartController::class, 'index'])
-        ->name('cart.index');
+Route::get('/cart', [CartController::class, 'index'])
+    ->name('cart.index');
 
-    Route::post('/cart/add/{car}', [CartController::class, 'add'])
-        ->name('cart.add');
+Route::post('/cart/add/{car}', [CartController::class, 'add'])
+    ->name('cart.add');
 
-    Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])
-        ->name('cart.remove');
-});
-
+Route::delete('/cart/remove/{item}', [CartController::class, 'remove'])
+    ->name('cart.remove');
 
 /*
 |--------------------------------------------------------------------------

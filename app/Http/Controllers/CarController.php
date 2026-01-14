@@ -134,6 +134,22 @@ class CarController extends Controller
     }
 
     /**
+     * --------------------------------------------------------------------------
+     *  Mostra tutti gli annunci pubblicati dall’utente autenticato
+     * --------------------------------------------------------------------------
+     *  - Recupera solo le auto dell’utente
+     *  - Ordinate dalla più recente
+     *  - Include lo stato di revisione
+     */
+    public function myCars()
+    {
+        $cars = Car::where('user_id', auth()->id())
+            ->latest()
+            ->get();
+
+        return view('cars.my-cars', compact('cars'));
+    }
+    /**
      * Display the specified resource.
      */
     public function show(Car $car)
@@ -147,22 +163,56 @@ class CarController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * --------------------------------------------------------------------------
+     *  Mostra il form di modifica dell’annuncio
+     * --------------------------------------------------------------------------
+     *  - Accessibile solo al proprietario dell’annuncio
+     *  - Precompila i campi con i dati esistenti
      */
     public function edit(Car $car)
-    // Mostra il form per modificare un annuncio (non ancora implementato).
     {
-        //
+        // Sicurezza: solo il proprietario può modificare
+        if ($car->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return view('cars.edit', compact('car'));
     }
 
+
+
     /**
-     * Update the specified resource in storage.
+     * --------------------------------------------------------------------------
+     *  Aggiorna l’annuncio nel database
+     * --------------------------------------------------------------------------
+     *  - Valida i dati
+     *  - Aggiorna solo i campi modificabili
      */
     public function update(Request $request, Car $car)
-    // Aggiorna un annuncio esistente (non ancora implementato).
     {
-        //
+        if ($car->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'title' => 'required|min:3',
+            'description' => 'required|min:10',
+            'price' => 'required|numeric|min:0',
+            'type' => 'required|in:sale_new,sale_used,rental',
+        ]);
+
+        $car->update([
+            'title' => $request->title,
+            'description' => $request->description,
+            'price' => $request->price,
+            'type' => $request->type,
+        ]);
+
+        return redirect()->route('user.cars')
+            ->with('success', 'Annuncio aggiornato con successo!');
     }
+
+
 
     /**
      * Remove the specified resource from storage.

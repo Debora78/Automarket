@@ -104,4 +104,14 @@ class User extends Authenticatable
     {
         return $this->hasOne(ReviewerRequest::class);
     }
+
+    /**
+     * Relazione molti-a-molti tra User e Car.
+     * Un utente può salvare più auto nei preferiti.
+     * La tabella pivot è "favorites".
+     */
+    public function favorites()
+    {
+        return $this->belongsToMany(Car::class, 'favorites')->withTimestamps();
+    }
 }

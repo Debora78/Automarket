@@ -21,6 +21,34 @@ Funzionalità:
             Inserisci un nuovo annuncio
         </h1>
 
+        {{-- Messaggio di successo --}}
+        @if (session('success'))
+            <div class="mb-6 p-4 bg-green-600 text-white rounded-lg shadow">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Messaggio di errore generico --}}
+        @if (session('error'))
+            <div class="mb-6 p-4 bg-red-600 text-white rounded-lg shadow">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        {{-- Errori di validazione --}}
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-red-600 text-white rounded-lg shadow">
+                <ul class="list-disc ml-4">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+
+
+
         {{-- Form --}}
         <form wire:submit.prevent="store" class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-x-14 gap-y-12">
 

@@ -45,6 +45,36 @@ class ReviewerRequestController extends Controller
         // Restituisce la vista passando la lista delle richieste.
     }
 
+    /**
+     * --------------------------------------------------------------------------
+     *  Salva una nuova richiesta di diventare revisore
+     * --------------------------------------------------------------------------
+     *  - L’utente autenticato invia la richiesta
+     *  - Se esiste già una richiesta pending, non ne crea un’altra
+     *  - Crea una nuova richiesta con stato "pending"
+     *  - Torna indietro con un messaggio di conferma
+     */
+    public function store()
+    {
+        // Controlla se l’utente ha già una richiesta in sospeso
+        $existing = ReviewerRequest::where('user_id', auth()->id())
+            ->where('status', 'pending')
+            ->first();
+
+        if ($existing) {
+            return back()->with('status', 'Hai già una richiesta in attesa.');
+        }
+
+        // Crea una nuova richiesta
+        ReviewerRequest::create([
+            'user_id' => auth()->id(),
+            'status'  => 'pending',
+        ]);
+
+        return back()->with('status', 'Richiesta inviata con successo!');
+    }
+
+
     public function accept($id)
     // Accetta una richiesta e promuove l’utente a revisore.
     {

@@ -1,14 +1,10 @@
 {{-- 
 NAVBAR PRINCIPALE DI AUTOMARKET
 
-Funzionalità:
-- Barra di navigazione fissa con effetto blur e glow verde
-- Link principali alle sezioni: nuove, usate, noleggio
-- Link aggiuntivo "Inserisci annuncio" per utenti autenticati
-- Dropdown utente (versione loggato / non loggato)
-- Badge "Revisore" se l’utente ha il ruolo dedicato
-- Icona notifiche con contatore animato
-- Completamente responsive e compatibile con Alpine.js
+Funzionalità aggiunte:
+- Icona carrello visibile a tutti (guest + utenti)
+- Menu utente completo (Profilo, Sicurezza, Annunci, Preferiti, Diventa revisore, Logout)
+- Mantiene stile dark + neon verde
 --}}
 
 <nav id="navbar"
@@ -47,9 +43,32 @@ Funzionalità:
                 </a>
             @endauth
 
-            {{-- DROPDOWN UTENTE --}}
+            {{-- ---------------------------------------------------------
+                 ICONA CARRELLO (visibile a tutti)
+               --------------------------------------------------------- --}}
+            <a href="{{ route('cart.index') }}" class="relative text-white hover:text-green-400">
+
+                {{-- Icona carrello --}}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437m0 0L6.75 14.25h10.5l2.25-8.25H5.106m0 0L4.125 6.75m2.625 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm10.5 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                </svg>
+
+                {{-- Badge quantità (opzionale) --}}
+                @if (session('cart_count', 0) > 0)
+                    <span
+                        class="absolute -top-2 -right-2 bg-green-500 text-xs text-white 
+                                 rounded-full px-2 py-0.5">
+                        {{ session('cart_count') }}
+                    </span>
+                @endif
+            </a>
+
+            {{-- ---------------------------------------------------------
+                 DROPDOWN UTENTE (versione loggato)
+               --------------------------------------------------------- --}}
             @auth
-                {{-- UTENTE LOGGATO --}}
                 <div class="relative" x-data="{ open: false }">
 
                     {{-- Bottone apertura dropdown --}}
@@ -76,14 +95,45 @@ Funzionalità:
 
                     {{-- Menu dropdown --}}
                     <div x-show="open" @click.away="open = false" x-transition
-                        class="absolute right-0 mt-2 w-40 bg-gray-800 border border-green-400 
-                           rounded shadow-md z-50">
+                        class="absolute right-0 mt-2 w-48 bg-gray-800 border border-green-400 
+                               rounded shadow-md z-50">
+
+                        {{-- Profilo utente --}}
+                        <a href="{{ route('profile.show') }}" class="block px-4 py-2 text-gray-200 hover:bg-gray-700">
+                            Profilo utente
+                        </a>
+
+                        {{-- Sicurezza e password (Fortify) --}}
+                        <a href="{{ route('password.change') }}" class="block px-4 py-2 text-gray-200 hover:bg-gray-700">
+                            Sicurezza e password
+                        </a>
+
+                        {{-- I miei annunci --}}
+                        <a href="{{ route('user.cars') }}" class="block px-4 py-2 text-gray-200 hover:bg-gray-700">
+                            I miei annunci
+                        </a>
+
+                        {{-- Preferiti --}}
+                        <a href="{{ route('favorites.index') }}" class="block px-4 py-2 text-gray-200 hover:bg-gray-700">
+                            Preferiti
+                        </a>
+
+                        {{-- Diventa revisore --}}
+                        @if (!Auth::user()->isRevisor())
+                            <form method="POST" action="{{ route('become.revisor') }}">
+                                @csrf
+                                <button type="submit"
+                                    class="block w-full text-left px-4 py-2 text-gray-200 hover:bg-gray-700">
+                                    Diventa revisore
+                                </button>
+                            </form>
+                        @endif
 
                         {{-- Logout --}}
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit"
-                                class="w-full text-left px-4 py-2 text-gray-200 hover:bg-gray-700 flex items-center">
+                                class="w-full text-left px-4 py-2 text-gray-200 hover:bg-red-600 flex items-center">
 
                                 {{-- Icona logout --}}
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,8 +146,11 @@ Funzionalità:
                         </form>
                     </div>
                 </div>
+
+                {{-- ---------------------------------------------------------
+                 DROPDOWN UTENTE (versione non loggato)
+               --------------------------------------------------------- --}}
             @else
-                {{-- UTENTE NON LOGGATO --}}
                 <div class="relative" x-data="{ open: false }">
 
                     {{-- Icona utente --}}
@@ -113,7 +166,7 @@ Funzionalità:
                     {{-- Dropdown login/registrazione --}}
                     <div x-show="open" @click.away="open = false" x-transition
                         class="absolute right-0 mt-2 w-40 bg-gray-800 border border-green-400 
-                           rounded shadow-md z-50">
+                               rounded shadow-md z-50">
 
                         <a href="{{ route('login') }}" class="block px-4 py-2 text-gray-200 hover:bg-gray-700">
                             Accedi

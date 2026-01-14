@@ -44,5 +44,15 @@ return Application::configure(basePath: dirname(__DIR__))
         // Qui è possibile configurare la gestione delle eccezioni personalizzate.
     })
 
+    ->withProviders([
+        App\Providers\FortifyServiceProvider::class,
+        // Qui si possono aggiungere provider di servizi personalizzati. FortifyServiceProvider gestisce l'intero sistema di autenticazione
+        // (login, registrazione, reset password, verifica email, ecc.) in modo
+        // headless, permettendoci di definire liberamente le nostre view personalizzate.
+
+
+    ])
+
+
     ->create();
 // Crea e restituisce l'istanza finale dell'applicazione.

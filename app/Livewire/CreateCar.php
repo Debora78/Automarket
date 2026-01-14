@@ -18,49 +18,31 @@
  */
 
 namespace App\Livewire;
-// Namespace dedicato ai componenti Livewire.
 
-use App\Models\Car;
-// Modello Car, necessario per creare il nuovo annuncio.
-
-use App\Models\Image;
-// Modello Image, usato per salvare i percorsi delle immagini.
-
-use App\Models\Category;
-// Modello Category, usato per popolare il select delle categorie.
-
-use Livewire\Component;
-// Classe base per i componenti Livewire.
-
-use Livewire\WithFileUploads;
-// Trait che abilita l’upload dei file in Livewire.
-
-use Livewire\Attributes\Layout;
-// Attributo per definire il layout in Livewire 3.
-
-use Intervention\Image\ImageManager;
-// Classe principale per manipolare immagini.
-
-use Intervention\Image\Encoders\JpegEncoder;
-// Encoder per convertire e comprimere immagini in JPG.
-
-use Illuminate\Support\Facades\Storage;
-// Facade per salvare file nello storage Laravel.
-
-use Illuminate\Support\Facades\Auth;
-// Facade per recuperare l’utente autenticato.
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\JpegEncoder; // Encoder JPG.
+use Livewire\WithFileUploads; // Trait che abilita l’upload dei file.
+use Livewire\Component;      // Classe base per i componenti Livewire.
+use Illuminate\Support\Facades\Storage; // Facade per salvare file nello storage.
+use Intervention\Image\ImageManager; // Classe principale per manipolare immagini.
+use Livewire\Attributes\Layout; // Attributo per definire il layout in Livewire 3.
+use App\Models\Car;          // Modello Car, necessario per creare il nuovo annuncio.
+use Illuminate\Support\Facades\Auth;    // Facade per recuperare l’utente autenticato.
+use App\Models\Image;        // Modello Image, usato per salvare i percorsi delle immagini.
+use App\Models\Category;     // Modello Category, usato per popolare il select delle categorie.
 
 // Usa il layout principale dell'applicazione
-#[Layout('layouts.layout')]
+#[Layout('components.layout')]
 
 class CreateCar extends Component
-// Componente Livewire che gestisce la creazione di un nuovo annuncio auto.
 {
-    use WithFileUploads;
-    // Abilita l’upload multiplo delle immagini.
+    use WithFileUploads; // Abilita l’upload multiplo delle immagini.
 
-    public $images = [];
-    // Array di immagini caricate dall’utente.
+    // ----------------------------------------------------------------------
+    // PROPRIETÀ PUBBLICHE (campi del form)
+    // ----------------------------------------------------------------------
+
+    public $images = []; // Array di immagini caricate dall’utente.
 
     public $title;
     public $description;
@@ -70,34 +52,36 @@ class CreateCar extends Component
     public $year;
     public $km;
 
-    public $listing_type = 'sale_used';
-    // Tipo annuncio predefinito: auto usata.
+    public $listing_type = 'sale_used'; // Tipo annuncio predefinito.
 
     public $color;
-    public $selected_accessories = [];
-    // Accessori selezionati (array salvato come JSON).
+    public $selected_accessories = []; // Accessori selezionati (JSON).
 
+    // ----------------------------------------------------------------------
+    // MOUNT: eseguito alla creazione del componente
+    // ----------------------------------------------------------------------
     public function mount()
-    // Metodo eseguito alla creazione del componente.
     {
         if (!auth()->check()) {
             // Se l’utente non è autenticato, reindirizza al login.
-
             return redirect()->route('login');
         }
     }
 
+    // ----------------------------------------------------------------------
+    // RENDER: restituisce la vista del form di creazione
+    // ----------------------------------------------------------------------
     public function render()
-    // Restituisce la vista del form di creazione.
     {
         return view('livewire.create-car', [
-            'categories' => Category::all(),
-            // Passa tutte le categorie alla vista.
+            'categories' => Category::all(), // Passa tutte le categorie alla vista.
         ]);
     }
 
+    // ----------------------------------------------------------------------
+    // STORE: salva l’annuncio e processa le immagini
+    // ----------------------------------------------------------------------
     public function store()
-    // Salva l’annuncio e processa le immagini.
     {
         // VALIDAZIONE DEI DATI INSERITI DALL'UTENTE
         $this->validate([
@@ -127,12 +111,13 @@ class CreateCar extends Component
             'km' => $this->km,
             'listing_type' => $this->listing_type,
             'color' => $this->color,
-            'accessories' => $this->selected_accessories,
-            // Salvato come JSON grazie al cast nel modello Car.
+            'accessories' => $this->selected_accessories, // JSON
         ]);
 
         // Inizializza ImageManager usando GD (compatibile con PHP 8.3)
-        $manager = new ImageManager('gd');
+        $manager = new ImageManager(new Driver());
+
+
 
         foreach ($this->images as $image) {
 
@@ -143,34 +128,38 @@ class CreateCar extends Component
             |--------------------------------------------------------------------------
             | 1. IMMAGINE PRINCIPALE
             |--------------------------------------------------------------------------
-            | - Ridimensiona mantenendo proporzioni
-            | - Evita distorsioni
-            | - Applica watermark
-            | - Converte in JPG qualità 80
             */
+            $watermark = public_path('img/watermark.png');
 
             $original = $manager->read($image->getRealPath())
-                ->scaleDown(1920) // riduce mantenendo proporzioni
-                ->place(public_path('img/watermark.png'), 'bottom-right', 20, 20)
-                ->encode(new JpegEncoder(quality: 80));
+                ->scaleDown(1920);
 
-            // Salva l'immagine principale
+            // Applica il watermark solo se esiste
+            if (file_exists($watermark)) {
+                $original->place($watermark, 'bottom-right', 20, 20);
+            }
+
+            $original = $original->encode(new JpegEncoder(quality: 80));
+
             Storage::put('public/cars/' . $filename, $original->toString());
-
             /*
             |--------------------------------------------------------------------------
-            | 2. THUMBNAIL
+            | 2. THUMBNAIL (Miniatura)
             |--------------------------------------------------------------------------
-            | - Ridimensiona max 400px
-            | - Mantiene proporzioni
-            | - Qualità 75
+            | La thumbnail è una versione ridotta dell’immagine principale.
+            | Serve per:
+            | - velocizzare il caricamento delle pagine (liste annunci, ricerche)
+            | - ridurre il peso complessivo del sito
+            | - migliorare la UX mostrando immagini leggere nelle anteprime
+            |
+            | L’immagine viene ridimensionata a max 400px mantenendo le proporzioni
+            | e compressa per ottenere un file molto più leggero rispetto all’originale.
+            | La versione grande viene usata solo nella pagina del singolo annuncio.
             */
-
             $thumb = $manager->read($image->getRealPath())
                 ->scaleDown(400)
                 ->encode(new JpegEncoder(quality: 75));
 
-            // Salva la thumbnail
             Storage::put('public/cars/thumb_' . $filename, $thumb->toString());
 
             /*
@@ -178,7 +167,6 @@ class CreateCar extends Component
             | 3. SALVATAGGIO NEL DATABASE
             |--------------------------------------------------------------------------
             */
-
             Image::create([
                 'path' => 'cars/' . $filename,
                 'thumbnail' => 'cars/thumb_' . $filename,
@@ -189,7 +177,7 @@ class CreateCar extends Component
         // MESSAGGIO DI SUCCESSO
         session()->flash('success', 'Annuncio creato con successo!');
 
-        // REINDIRIZZAMENTO ALLA HOMEPAGE
-        return redirect()->route('homepage');
+        // RESETTA IL FORM
+        $this->reset(); // Resetta il form
     }
 }
