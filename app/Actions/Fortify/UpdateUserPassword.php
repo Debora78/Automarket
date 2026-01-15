@@ -48,19 +48,25 @@ class UpdateUserPassword implements UpdatesUserPasswords
     // Metodo pubblico che riceve l'utente autenticato e i dati del form, e aggiorna la password.
     {
         Validator::make($input, [
-            // Avvia la validazione dei dati ricevuti.
 
             'current_password' => ['required', 'string', 'current_password:web'],
-            // 'required' → la password attuale è obbligatoria.
-            // 'string'   → deve essere una stringa.
-            // 'current_password:web' → verifica automaticamente che la password inserita corrisponda a quella dell'utente loggato.
 
-            'password' => $this->passwordRules(),
-            // Applica le regole di validazione della nuova password definite nel trait.
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/[a-z]/',      // almeno una minuscola
+                'regex:/[A-Z]/',      // almeno una maiuscola
+                'regex:/[0-9]/',      // almeno un numero
+                'regex:/[@$!%*#?&]/', // almeno un carattere speciale
+                'confirmed',
+            ],
+
         ], [
             'current_password.current_password' => __('The provided password does not match your current password.'),
-            // Messaggio personalizzato mostrato quando la password attuale non è corretta.
+            'password.regex' => __('The password must contain at least one uppercase letter, one lowercase letter, one number and one special character.'),
         ])->validateWithBag('updatePassword');
+
         // Valida i dati e, in caso di errore, inserisce i messaggi nella bag 'updatePassword'.
 
         $user->forceFill([

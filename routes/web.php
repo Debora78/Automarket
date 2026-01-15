@@ -35,13 +35,15 @@ use App\Http\Controllers\CarController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProfileSecurityController;
+use App\Http\Controllers\CheckoutController;
+
 
 // Controller per revisori e amministratori
-use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReviewerCarController;
 use App\Http\Controllers\AdminReviewerController;
+use App\Http\Controllers\RevisorRequestController;
+use App\Http\Controllers\ProfileSecurityController;
 use App\Http\Controllers\ReviewerRequestController;
 
 
@@ -119,6 +121,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('dashboard');
 
 
+
+
 /*
 |--------------------------------------------------------------------------
 | Profilo utente
@@ -134,6 +138,20 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+});
+
+/* --------------------------------------------------------------------------
+| Richiesta ruolo revisore (pagina + invio)
+|-------------------------------------------------------------------------- */
+Route::middleware('auth')->group(function () {
+
+    // Pagina form
+    Route::get('/diventa-revisore', [RevisorRequestController::class, 'create'])
+        ->name('revisor.form');
+
+    // Invio richiesta
+    Route::post('/diventa-revisore', [RevisorRequestController::class, 'store'])
+        ->name('revisor.request');
 });
 
 /*
@@ -188,7 +206,10 @@ Route::middleware(['auth'])->group(function () {
 | Area Admin (gestione richieste revisore)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware([
+    'auth',
+    \App\Http\Middleware\AdminMiddleware::class
+])->group(function () {
 
     Route::get('/admin/reviewer-requests', [AdminReviewerController::class, 'index'])
         ->name('admin.reviewer.index');

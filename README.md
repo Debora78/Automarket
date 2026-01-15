@@ -199,6 +199,54 @@ routes/
 ├── web.php
 └── auth.php
 
+### 📌 Gestione Ruolo Admin via Artisan
+
+## 🔐 Gestione ruolo Admin tramite comandi Artisan
+
+L’applicazione include due comandi personalizzati che permettono di assegnare o rimuovere il ruolo **admin** da un utente tramite email, senza dover modificare manualmente il database.
+
+Questi comandi sono utili durante lo sviluppo, il testing o la gestione del sistema in produzione.
+
+---
+
+### 🟩 Assegnare il ruolo Admin
+
+Rende amministratore un utente esistente:
+
+# Bash
+
+php artisan user:make-admin email@example.com
+
+# Funzionamento:
+
+-   Cerca l’utente tramite email
+-   Se esiste, imposta is_admin = 1
+-   Mostra un messaggio di conferma
+
+### 🟥 Rimuovere il ruolo Admin
+
+Rimuove i privilegi di amministratore da un utente:
+
+# Bash
+
+php artisan user:remove-admin email@example.com
+
+# Funzionamento:
+
+-   Cerca l’utente tramite email
+-   Se esiste, imposta is_admin = 0
+-   Mostra un messaggio di conferma
+
+📁 Percorso dei comandi
+I comandi si trovano in:
+app/Console/Commands/
+
+### 🧩 Note
+
+-   I comandi funzionano solo se l’utente esiste nel database.
+-   Sono utili per gestire rapidamente gli accessi alla dashboard admin.
+-   Possono essere estesi per gestire altri ruoli in futuro.
+
 ### 📄 Licenza
 
 MIT License (o quella che preferisci).
@@ -238,18 +286,18 @@ Tutte queste carte sono ufficiali Stripe.
 
 ## 🧪 3. Come testare il pagamento nel tuo sito
 
-1.       Vai su http://localhost:8000/cart
-2.       Aggiungi un’auto al carrello
-3.       Clicca Procedi al pagamento
-4.       Stripe ti porterà alla pagina checkout
-5.       Inserisci la carta di test:
+1.        Vai su http://localhost:8000/cart
+2.        Aggiungi un’auto al carrello
+3.        Clicca Procedi al pagamento
+4.        Stripe ti porterà alla pagina checkout
+5.        Inserisci la carta di test:
     4242 4242 4242 4242
     12/34
     123
-6.       Conferma il pagamento
-7.       Stripe ti reindirizzerà alla pagina:
+6.        Conferma il pagamento
+7.        Stripe ti reindirizzerà alla pagina:
     /checkout/success
-8.       Il carrello verrà svuotato automaticamente
+8.        Il carrello verrà svuotato automaticamente
 
 ## 📊 4. Dove vedere il pagamento su Stripe
 

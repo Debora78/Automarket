@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-layout>
     <div class="max-w-4xl mx-auto py-10">
 
         {{-- Titolo pagina --}}
@@ -47,4 +47,4 @@
         @endif
 
     </div>
-</x-app-layout>
+</x-layout>

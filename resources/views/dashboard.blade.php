@@ -98,7 +98,7 @@ Funzionalità:
         {{-- Pulsante richiesta revisore --}}
         @if (!Auth::user()->isRevisor() && !Auth::user()->isAdmin())
             <div class="text-center mt-6">
-                <form action="{{ route('reviewer.request') }}" method="POST">
+                <form action="{{ route('revisor.request') }}" method="POST">
                     @csrf
                     <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
                         Richiedi di diventare revisore
